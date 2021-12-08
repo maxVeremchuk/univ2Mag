@@ -1,0 +1,24 @@
+node {
+   stage('Get Source') {
+      // copy source code from local file system and test
+      // for a Dockerfile to build the Docker image
+      deleteDir()
+      bat("xcopy /s /i C:\\Users\\maxim\\Desktop\\univ2mag\\devops devops")
+      if (!fileExists("devops/Dockerfile")) {
+         error('Dockerfile missing.')
+      }
+   }
+   stage('Unit Test') {
+      // run the unit tests
+      dir("devops") {
+         bat """"C:\\Program Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.7_3.7.2544.0_x64__qbz5n2kfra8p0\\pip" install -r requirements.txt"""
+         bat """"C:\\Program Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.7_3.7.2544.0_x64__qbz5n2kfra8p0\\python" -m pytest tests/test.py"""
+      }
+   }
+   stage('Build Docker') {
+       // build the docker image from the source code using the BUILD_ID parameter in image name
+       dir("devops") {
+         bat  "docker build -t testapp-${BUILD_ID} ."
+       }
+   }
+}
